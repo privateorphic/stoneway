@@ -16,9 +16,12 @@ export function CustomCursor() {
   const followerX = useSpring(mouseX, springConfig)
   const followerY = useSpring(mouseY, springConfig)
 
+  const visibleRef = React.useRef(false)
+
   useEffect(() => {
-    // Disable on touch devices
-    if (window.matchMedia("(pointer: coarse)").matches) {
+    // Disable on touch devices and small screens (tablets/phones)
+    const isTouchOrSmall = window.matchMedia("(pointer: coarse), (max-width: 1024px)").matches
+    if (isTouchOrSmall) {
       setIsTouchDevice(true)
       return
     }
@@ -27,7 +30,10 @@ export function CustomCursor() {
     const handleMouseMove = (e: MouseEvent) => {
       mouseX.set(e.clientX)
       mouseY.set(e.clientY)
-      if (!isVisible) setIsVisible(true)
+      if (!visibleRef.current) {
+        visibleRef.current = true
+        setIsVisible(true)
+      }
 
       // Check element under cursor for special interactive states
       const target = e.target as HTMLElement | null
@@ -49,10 +55,12 @@ export function CustomCursor() {
     }
 
     const handleMouseLeave = () => {
+      visibleRef.current = false
       setIsVisible(false)
     }
 
     const handleMouseEnter = () => {
+      visibleRef.current = true
       setIsVisible(true)
     }
 
@@ -65,7 +73,7 @@ export function CustomCursor() {
       document.removeEventListener("mouseleave", handleMouseLeave)
       document.removeEventListener("mouseenter", handleMouseEnter)
     }
-  }, [mouseX, mouseY, isVisible])
+  }, [mouseX, mouseY])
 
   if (isTouchDevice) return null
 

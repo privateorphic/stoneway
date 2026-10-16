@@ -19,13 +19,34 @@ export function SiteHeader() {
   const [open, setOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const pathname = usePathname()
+
   useEffect(() => {
     const update = () => setScrolled(window.scrollY > 24)
     update()
     window.addEventListener("scroll", update, { passive: true })
     return () => window.removeEventListener("scroll", update)
   }, [])
-  useEffect(() => setOpen(false), [pathname])
+
+  useEffect(() => {
+    setOpen(false)
+  }, [pathname])
+
+  // Prevent background scrolling and allow Escape to close menu on mobile
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = "hidden"
+      const onKeyDown = (e: KeyboardEvent) => {
+        if (e.key === "Escape") setOpen(false)
+      }
+      window.addEventListener("keydown", onKeyDown)
+      return () => {
+        document.body.style.overflow = ""
+        window.removeEventListener("keydown", onKeyDown)
+      }
+    } else {
+      document.body.style.overflow = ""
+    }
+  }, [open])
 
   return (
     <header className={`site-header ${scrolled ? "site-header-scrolled" : ""} ${open ? "site-header-open" : ""}`}>

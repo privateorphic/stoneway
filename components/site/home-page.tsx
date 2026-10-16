@@ -54,19 +54,49 @@ const localStrength = [
 function HeroVideo() {
   const videoRef = useRef<HTMLVideoElement>(null)
   const reduced = useReducedMotion()
+  const [canLoadVideo, setCanLoadVideo] = useState(false)
+
+  useEffect(() => {
+    // Only load external video stream on desktop/laptop devices
+    const isDesktop = window.matchMedia("(min-width: 992px)").matches
+    if (isDesktop && !reduced) {
+      setCanLoadVideo(true)
+    }
+  }, [reduced])
+
   useEffect(() => {
     const video = videoRef.current
-    if (!video) return
+    if (!video || !canLoadVideo) return
     const updatePlayback = () => {
-      if (document.hidden || reduced || window.matchMedia("(max-width: 700px)").matches) video.pause()
+      if (document.hidden || reduced || window.matchMedia("(max-width: 991px)").matches) video.pause()
       else video.play().catch(() => undefined)
     }
     updatePlayback()
     document.addEventListener("visibilitychange", updatePlayback)
     window.addEventListener("resize", updatePlayback)
-    return () => { document.removeEventListener("visibilitychange", updatePlayback); window.removeEventListener("resize", updatePlayback) }
-  }, [reduced])
-  return <video ref={videoRef} className="hero-video" autoPlay muted loop playsInline preload="none" poster="https://stoneway-testing-home.netlify.app/images/about-us-body-image.jpg" aria-hidden="true"><source src="https://demo.awaikenthemes.com/assets/videos/tilux-hero-video.mp4" type="video/mp4" /></video>
+    return () => {
+      document.removeEventListener("visibilitychange", updatePlayback)
+      window.removeEventListener("resize", updatePlayback)
+    }
+  }, [reduced, canLoadVideo])
+
+  if (!canLoadVideo) return null
+
+  return (
+    <video
+      ref={videoRef}
+      className="hero-video"
+      autoPlay
+      muted
+      loop
+      playsInline
+      preload="metadata"
+      poster="https://stoneway-testing-home.netlify.app/images/about-us-body-image.jpg"
+      aria-hidden="true"
+    >
+      <source src="https://demo.awaikenthemes.com/assets/videos/tilux-hero-video.mp4" type="video/mp4" />
+    </video>
+  )
 }
 
 export function PartnerMarquee() {

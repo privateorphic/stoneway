@@ -1,8 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  compress: true,
+  poweredByHeader: false,
   images: {
     remotePatterns: [{ protocol: "https", hostname: "stoneway-testing-home.netlify.app", pathname: "/images/**" }],
     formats: ["image/avif", "image/webp"],
+    minimumCacheTTL: 2592000,
   },
   async headers() {
     return [
